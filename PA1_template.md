@@ -1,19 +1,14 @@
----
-title: "Reproducible Research Week1 Assignment"
-author: "Mia Rong"
-date: "February 11, 2016"
-output:  
-  html_document:    
-    keep_md: yes
-
----
+# Reproducible Research Week1 Assignment
+Mia Rong  
+February 11, 2016  
 
 ## Loading and preprocessing the data
 
 1. Load the data  
 2. Change the class of date from factor to date
 
-```{r, echo = TRUE}
+
+```r
 filename <- unzip("activity.zip")
 data <- read.csv(filename, stringsAsFactors = FALSE)
 data$date <- as.Date(data$date, format = "%Y-%m-%d")
@@ -23,23 +18,50 @@ data$date <- as.Date(data$date, format = "%Y-%m-%d")
 1. Calculate the total number of steps taken per day
 2. If you do not understand the difference between a histogram and a barplot, research the difference between them. Make a histogram of the total number of steps taken each day
 3. Calculate and report the mean and median of the total number of steps taken per day
-```{r, echo=TRUE}
+
+```r
 nd <- data[!is.na(data$steps) == TRUE,]
 ad <- aggregate(nd$steps,by=list(nd$date),sum) 
 names(ad) <- c("date","sum_steps")
 hist(ad$sum_steps, breaks =20, main = "Sum of steps per day", xlab = "sum of steps")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)
+
+```r
 mean(ad$sum_steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(ad$sum_steps)
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
 1. Make a time series plot (i.e. 𝚝𝚢𝚙𝚎 = "𝚕") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r, echo=TRUE}
+
+```r
 ad<- aggregate(nd$steps,by=list(nd$interval),mean) 
 names(ad) <- c("interval","mean_steps")
 plot(ad$interval, ad$mean_steps, type ="l", xlab = "5 min interval", ylab = "Average number of steps taken", main = "Average number of steps per interval")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)
+
+```r
 ad$interval[ad$mean_steps == max(ad$mean_steps)]
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
@@ -55,16 +77,41 @@ Note that there are a number of days/intervals where there are missing values (c
 
 ##### Strategy of imputing NA is to provide mean of the value
 
-```{r, echo=TRUE}
+
+```r
 sum(is.na(data))
+```
+
+```
+## [1] 2304
+```
+
+```r
 data_trans <- transform(data, steps = ifelse(is.na(steps), mean(steps, na.rm=TRUE), steps))
 ```
 
-```{r, echo=TRUE}
+
+```r
 sum_date<-tapply(data_trans$steps, data_trans$date, sum)
 hist(sum_date, breaks = 20, main = "Histogram of Total Number of Steps per Day on  Impute Value", xlab = "Total Number of Steps per Day", ylab = "Frequency")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)
+
+```r
 mean(sum_date)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(sum_date)
+```
+
+```
+## [1] 10766.19
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -77,7 +124,8 @@ For this part the 𝚠𝚎𝚎𝚔𝚍𝚊𝚢𝚜() function may be of some hel
 
 2. Make a panel plot containing a time series plot (i.e. 𝚝𝚢𝚙𝚎 = "𝚕") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
-```{r, echo=TRUE}
+
+```r
 data_trans$day <- weekdays(as.Date(data_trans$date))
 data_trans$week[(data_trans$day == "Monday")|(data_trans$day == "Tuesday")|(data_trans$day == "Wednesday")|(data_trans$day == "Thursday")|(data_trans$day == "Friday")] <-"weekday"
 data_trans$week[(data_trans$day == "Saturday")|(data_trans$day == "Sunday")]  <-"weekend"
@@ -87,3 +135,5 @@ library(lattice)
 final <- ddply(data_trans, c("interval", "week"), function(x) apply(x[1], 2, mean))
 xyplot(steps~interval | week, data= final, layout = c(1,2), type = "l", ylab= "Number of steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)
